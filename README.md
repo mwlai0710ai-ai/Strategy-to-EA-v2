@@ -2,7 +2,123 @@ This file provides guidance when working with code in this repository. The READM
 
 # Project Notes
 
-<!-- Documentation for this specific project goes here. This will include both an articulation of what this project aims to accomplish as well as technical details about how it works. This means explaining the purpose of the project as a whole along with an overview of the design choices. -->
+> **Published site:** https://strategy-to-ea-v2-mwlai.zocomputer.io (public)
+> **This folder is the canonical v2 source.** It is a Zo Site: `index.html` + `public/app/*.js`.
+> The v1 site is a separate deployment from `../strategy-to-ea-v1` and stays untouched.
+>
+> When you change the framework, edit the files here, then republish this site. Copying changes
+> back into `../strategy-to-ea-v1` is not needed and republishing *that* folder would replace the
+> live v1 URL with v2.
+
+**Strategy → EA v2** — an interactive, single-page framework that turns a trading idea into three
+consistent artifacts: a Technical Spec, a compilable **MQL5 Expert Advisor**, and a **Pine Script v6
+`strategy()`**. The tool lives at the site root (`/`).
+
+## What v2 changed
+
+v1 was a flat form: 41 independent fields, of which only 25 reached generated code and several
+contradicted each other (see `Strategy-to-EA-V1-Parameter-Review.md`). v2 makes the framework itself
+self-consistent. Four guarantees, each mechanically verified rather than asserted:
+
+1. **No contradiction inside an aspect.** Options are filtered per field, and dependent fields
+   (`slAtr` vs `slPoints`, `riskPercent` vs `fixedLots`) are only in play when their sibling selects
+   them.
+2. **No contradiction across aspects.** `lens` restricts `family`, `family` restricts `sub`, `lens`
+   = Range removes the trend filter, `tpMode` decides whether `rrTarget` exists at all, and
+   `closeOnSessionEnd` requires `sessionGate`. Blocked options stay visible with the reason.
+3. **Every selected setting reaches all three outputs.** Each generator records the keys it reads;
+   the UI compares that against the active field set and prints `Spec n/n · MQL5 n/n · Pine n/n`.
+4. **Every review finding is fixed** — the reward:risk contradiction, the dead options, `fast > slow`,
+   the Pine `indicator()`/`strategy.opentrades` compile error, the MQL/Pine session divergence, the
+   stale `sub`, the peak-to-trough drawdown, the empty session window, and the spec's false
+   "all N values become inputs" claim.
+
+## Architecture
+
+Plain ES5-style classic scripts loaded from `public/app/` in dependency order. No build step, no
+framework, no dependencies — the page is the app.
+
+| File | Role |
+|---|---|
+| `index.html` | Markup + CSS + the `<script src="/app/…">` tags |
+| `public/app/model.js` | The framework: 60 field definitions across 10 aspects, family/mechanic maps, applicability predicates, cautions |
+| `public/app/engine.js` | The constraint resolver — applies `applies`/`optAvail`, coerces ruled-out selections, emits adjustment and caution notes |
+| `public/app/gen-spec.js` | Technical Spec generator |
+| `public/app/gen-mql.js` | MQL5 EA generator |
+| `public/app/gen-pine.js` | Pine Script v6 `strategy()` generator |
+| `public/app/ui.js` | Menu, detail pane, settings panel, report, coverage proof, tabs |
+| `tools/audit-coverage.mjs` | Node harness: coverage gaps, inactive leaks, contradictions |
+| `tools/audit-structure.mjs` | Node harness: MQL5/Pine structural integrity |
+| `tools/gen-manual.mjs` | Generates `Strategy-to-EA-V2-User-Manual.md` from `model.js` |
+| `tools/sample.mjs` | Prints one artifact for eyeballing (`spec` \| `mql` \| `pine`) |
+
+### The field model
+
+A field is `def(key, { label, kind, options|min/max/step, def, hint, applies, optAvail, land })`.
+
+- `applies(s) → {f, why}` (via the `A()` helper) — is the field in play at all? An inactive field is
+  greyed with the reason and is **never emitted**.
+- `optAvail(option, s) → true | reasonString` — is this option compatible with the rest of the state?
+  An unavailable option is shown struck-through with the reason.
+- `land: { mql, pine }` — `logic` (compiled into behaviour), `doc` (documented in the script header),
+  or absent. Surfaced in the UI so the promise is auditable.
+
+`engine.js` resolves to a fixpoint (up to 6 passes), so a change to `lens` cascades through `family`
+→ `sub` → mechanic parameters in one pass, recording each auto-adjustment with the rule that fired.
+
+### Where settings land
+
+`strategy()` made Pine a real peer of the EA. Trailing stops use `trail_points`/`trail_offset`, the
+kill switches use `strategy.risk.max_intraday_loss` / `max_drawdown`, pending orders use
+`strategy.entry(limit=/stop=)`, and position size is computed from `syminfo.pointvalue`.
+
+Three settings cannot exist in Pine and are documented in its header instead of being silently
+dropped: `magic`, `maxSpread` (Pine has no spread feed), and the Aspect 10 validation plan (no script
+can set a tester's modelling mode). The UI labels these `Pine: doc`.
+
+### Invariants to keep when editing
+
+- **Every field must be consumed by all three generators.** `act(key)` marks consumption — use it for
+  any decision that depends on a setting being in play. A new field that is not wired in fails the
+  coverage audit, which is the point.
+- **An out-of-play select value must never appear in output.** `tools/audit-coverage.mjs` asserts this
+  over every combination.
+- **Pine is a `strategy()`, never an `indicator()`.** v1 emitted `indicator()` while its dashboard block
+  referenced `strategy.opentrades`, which TradingView rejects.
+- **MQL5 must compile.** The structure audit checks brace/paren balance, that every `Inp_*` is declared
+  and every `CFG_*` macro defined, and that no declared input is left unused.
+- **`model.js` is the single source of truth.** The UI, all three generators and the generated manual
+  read it. Change the framework there, not in four places.
+
+### Verification
+
+Two node harnesses run the generators over the whole combination space:
+
+```bash
+node tools/audit-coverage.mjs    # 13,856 configs: coverage gaps, inactive leaks, contradictions
+node tools/audit-structure.mjs   #  7,776 configs: brace/paren balance, undeclared/unused identifiers
+node tools/sample.mjs mql        # print one artifact for eyeballing (spec | mql | pine)
+```
+
+```bash
+node tools/gen-manual.mjs        # regenerate Strategy-to-EA-V2-User-Manual.md from the model
+```
+
+Both audits must print `NONE` before a change is done. The page also carries the same coverage check at
+runtime — the **Verify** button sweeps 82,944 full configurations in the browser and the coverage
+panel reports the live selection.
+
+## Known limitations
+
+- The MQL EA and the Pine strategy are reference implementations of the same logic, not
+  byte-equivalent. Spread, magic number and retry behaviour have no Pine equivalent.
+- Pending orders in the MQL build are cancelled when a new signal arrives rather than expiring on a
+  timer, so a stale pending cannot sit in the book for days.
+- Aspect 10 (Test & Validate) is a plan, not code. It is emitted into the spec and both script
+  headers and labelled `doc` in the UI.
+- The tool generates one symbol, one timeframe, one session per run by design.
+- The v1 single-file app is preserved at `../Strategy-to-ea-v1/index.html`; the v2 sources are not
+  inlined into a single file, so the two are not byte-comparable.
 
 ---
 
