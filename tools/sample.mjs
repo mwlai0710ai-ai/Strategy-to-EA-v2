@@ -1,5 +1,7 @@
 import fs from 'fs';
-const APP='/home/workspace/Finance Experiment/strategy-to-ea-v1/public/app';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+const APP = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'app') + '/';
 global.window=global;
 for(const f of ['model.js','engine.js','gen-spec.js','gen-mql.js','gen-pine.js'])
   (0,eval)(fs.readFileSync(`${APP}/${f}`,'utf8'));
