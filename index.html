@@ -103,6 +103,26 @@ header{
   font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;flex:none;
   background:var(--card2);color:var(--dim);border:1px solid var(--border);
 }
+/* ── reference panel (a separate box below the aspects) ─────── */
+.rail{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rail-ref{padding:8px;box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.rail-ref .rail-doc{background:var(--bg2)}
+.rail-doc{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;
+  border:1px solid transparent;background:transparent;color:var(--muted);
+  text-decoration:none;font-size:13px;transition:.14s;
+}
+.rail-doc:hover{background:var(--card2);color:var(--fg);border-color:var(--border2)}
+.rail-doc .rd-ic{
+  width:22px;height:22px;flex:none;border-radius:7px;display:grid;place-items:center;
+  font-size:12px;font-weight:700;color:var(--gold);
+  background:rgba(246,193,127,.10);border:1px solid rgba(246,193,127,.30);
+}
+.rd-t{flex:1;min-width:0;line-height:1.25}
+.rd-t b{display:block;font-size:12.5px;font-weight:600;color:inherit}
+.rd-t span{display:block;font-size:10.5px;color:var(--dim);margin-top:1px}
+.rd-go{flex:none;font-size:11px;color:var(--dim);transition:.14s}
+.rail-doc:hover .rd-go{color:var(--gold)}
 .m-chip.ok{color:#8ff0b8;border-color:rgba(61,220,132,.35);background:rgba(61,220,132,.08)}
 .m-chip.part{color:#ffd28a;border-color:rgba(255,176,32,.35);background:rgba(255,176,32,.08)}
 .m-chip.na{color:var(--dim);opacity:.75}
@@ -282,10 +302,19 @@ pre#output::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px}
   </header>
 
   <div class="cols">
-    <aside class="panel">
-      <div class="panel-b">
-        <p class="menu-hint">10 aspects · click to expand</p>
-        <nav id="menu"></nav>
+    <aside class="rail">
+      <div class="panel">
+        <div class="panel-b">
+          <p class="menu-hint">10 aspects · click to expand</p>
+          <nav id="menu"></nav>
+        </div>
+      </div>
+      <div class="panel rail-ref">
+        <a class="rail-doc" href="/manual/Strategy-to-EA-V2-User-Manual.pdf" target="_blank" rel="noopener">
+          <span class="rd-ic">&sect;</span>
+          <span class="rd-t"><b>User Manual</b><span>All 10 aspects &middot; PDF</span></span>
+          <span class="rd-go">&#8599;</span>
+        </a>
       </div>
     </aside>
     <main class="panel">

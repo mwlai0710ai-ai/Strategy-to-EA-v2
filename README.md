@@ -40,7 +40,7 @@ framework, no dependencies — the page is the app.
 
 | File | Role |
 |---|---|
-| `index.html` | Markup + CSS + the `<script src="/app/…">` tags |
+| `index.html` | Markup + CSS + the `<script src="/app/…">` tags, including the left rail (aspect menu + separate User Manual card) |
 | `public/app/model.js` | The framework: 60 field definitions across 10 aspects, family/mechanic maps, applicability predicates, cautions |
 | `public/app/engine.js` | The constraint resolver — applies `applies`/`optAvail`, coerces ruled-out selections, emits adjustment and caution notes |
 | `public/app/gen-spec.js` | Technical Spec generator |
@@ -51,6 +51,7 @@ framework, no dependencies — the page is the app.
 | `tools/audit-structure.mjs` | Node harness: MQL5/Pine structural integrity |
 | `tools/gen-manual.mjs` | Generates `Strategy-to-EA-V2-User-Manual.md` from `model.js` |
 | `tools/sample.mjs` | Prints one artifact for eyeballing (`spec` \| `mql` \| `pine`) |
+| `public/manual/` | Built copy of the User Manual PDF linked from the left rail |
 
 ### The field model
 
@@ -107,6 +108,25 @@ node tools/gen-manual.mjs        # regenerate Strategy-to-EA-V2-User-Manual.md f
 Both audits must print `NONE` before a change is done. The page also carries the same coverage check at
 runtime — the **Verify** button sweeps 82,944 full configurations in the browser and the coverage
 panel reports the live selection.
+
+### The left rail
+
+The left column is `<aside class="rail">`, holding two siblings: the aspects `.panel` (the `#menu`
+nav) and a separate `.panel.rail-ref` card below it for reference material. Keep them as distinct
+panels — the manual is deliberately not a row inside the aspect list.
+
+The card links to `public/manual/Strategy-to-EA-V2-User-Manual.pdf`. That file is a **build copy**:
+regenerate it after changing the framework, or the rail serves a stale manual.
+
+```bash
+node tools/gen-manual.mjs                     # rewrite the .md from model.js
+pandoc Strategy-to-EA-V2-User-Manual.md -o Strategy-to-EA-V2-User-Manual.pdf \
+  --pdf-engine=wkhtmltopdf --metadata title="Strategy to EA v2 — User Manual"
+cp Strategy-to-EA-V2-User-Manual.pdf public/manual/
+```
+
+(The `pandoc` call needs `LANG=C.UTF-8` on this host, otherwise wkhtmltopdf fails with
+`recoverEncode: invalid argument`.)
 
 ## Known limitations
 
