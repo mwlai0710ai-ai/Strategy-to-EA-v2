@@ -124,8 +124,27 @@ def chip(s, x, y, w, h, label, fill, fg, size=7.5):
 # ══════════════════════════════════════════════════ 1 · TITLE
 s = prs.slides.add_slide(BLANK)
 rect(s, 0, 0, W, H, fill=PAPER, line=None)
-text(s, ML, 0.62, CW, 0.24, 'STRATEGY  →  EA  v2      ·      A FRAMEWORK FOR SYSTEMATIC TRADING',
+text(s, ML, 0.62, 7.4, 0.24, 'STRATEGY  →  EA  v2      ·      A FRAMEWORK FOR SYSTEMATIC TRADING',
      size=9.5, color=BLUE, bold=True)
+
+# live-site link, top right of slide 1
+SITE = 'https://strategy-to-ea-v2-mwlai.zocomputer.io/'
+pill = rect(s, 9.48, 0.55, 3.10, 0.31, fill=BF, line=RGBColor(0xC9,0xDA,0xF8), radius=0.5)
+_tf = pill.text_frame
+_tf.word_wrap = False
+_tf.margin_left = _tf.margin_right = 0
+_tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+_p = _tf.paragraphs[0]; _p.alignment = PP_ALIGN.CENTER
+_r = run(_p, 'strategy-to-ea-v2-mwlai.zocomputer.io  ↗', 8.5, BLUE, True)
+_r.hyperlink.address = SITE
+
+# the pill itself is clickable too, not just the glyphs
+from pptx.opc.constants import RELATIONSHIP_TYPE as RT
+from pptx.oxml.ns import qn as _qn
+from lxml import etree as _et
+_rid = pill.part.relate_to(SITE, RT.HYPERLINK, is_external=True)
+_hl = _et.SubElement(pill._element.nvSpPr.cNvPr, _qn('a:hlinkClick'))
+_hl.set(_qn('r:id'), _rid)
 text(s, ML, 0.94, 11.2, 1.30,
      [('Your trading idea, written once', {'line': 1.06}),
       ('and rendered three ways', {'line': 1.06})],
