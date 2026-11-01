@@ -7,6 +7,162 @@ from pptx.oxml.ns import qn
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from lxml import etree as _et
 
+import sys
+
+LANG = (sys.argv[1] if len(sys.argv) > 1 else 'en').lower()
+ZH = LANG in ('cn', 'zh', 'zh-tw', 'zh_hant', 'tc')
+
+TR = {
+ 'STRATEGY  →  EA  v2      ·      A FRAMEWORK FOR SYSTEMATIC TRADING':
+   'STRATEGY  →  EA  v2      ·      系統化交易的框架',
+ 'Ten questions decide the strategy. One constraint engine checks that the answers agree. The same decisions are then emitted as a technical specification, an MQL5 expert advisor and a Pine Script strategy — with no setting left behind.':
+   '十個問題決定一套策略。一個約束引擎負責檢查答案是否互相一致，再把同一組決定輸出成技術規格書、MQL5 專家顧問與 Pine Script 策略——沒有任何一個設定被漏掉。',
+ 'Your trading idea, written once': '你的交易想法，只寫一次',
+ 'and rendered three ways': '呈現為三種形式',
+ 'INPUT': '輸入',
+ '10 aspects': '10 個面向',
+ '60 settings in the model. Only the ones the chosen path needs ever switch on.':
+   '模型共有 60 個設定，只有所選路徑真正需要的才會啟用。',
+ 'CONSTRAINT ENGINE': '約束引擎',
+ 'Three gates': '三道關卡',
+ 'Applicability, availability and contradiction — re-checked on every change you make.':
+   '適用性、可用性與矛盾檢查——每次改動都重新驗算。',
+ 'Verified across 13,856 configurations   ·   no setting reaches one artefact and not the others   ·   no contradictory pair is reachable':
+   '已驗證 13,856 種組合   ·   沒有任何設定只到達其中一份產物   ·   無法選出互相矛盾的組合',
+ 'Technical Spec': '技術規格書',
+ 'the document a reviewer reads': '審閱者閱讀的文件',
+ 'MQL5 Expert Advisor': 'MQL5 專家顧問',
+ 'the executable for MetaTrader 5': 'MetaTrader 5 的執行檔',
+ 'the backtest in TradingView': 'TradingView 上的回測',
+ '41 / 41 settings': '41 / 41 個設定',
+
+ 'A   ·   THE BASIC LOGIC': 'A   ·   基本邏輯',
+ 'The framework is a cascade, not a form': '這是一條層層收窄的決策鏈，不是一張表格',
+ 'MARKET LENS': '市場視角',
+ 'What regime must the market be in?': '市場必須處於什麼狀態？',
+ 'Trend · Range · Volatility · Session bias': '趨勢 · 區間 · 波動 · 時段偏向',
+ 'FAMILY': '策略家族',
+ 'Which edge suits that regime?': '哪一種優勢適合這種狀態？',
+ 'A Range lens rules out Breakout and Momentum': '選了區間視角，就排除突破與動能',
+ 'MECHANIC': '具體機制',
+ 'Which exact algorithm is emitted?': '實際輸出的是哪一個演算法？',
+ 'Breakout offers Donchian or opening range only': '突破家族只有 Donchian 或開盤區間可選',
+ 'PARAMETERS': '參數',
+ 'Which numbers does that algorithm need?': '這個演算法需要哪些數字？',
+ 'the mechanic decides which settings exist at all': '機制決定哪些設定才存在',
+ 'GATE 01': '關卡 01',
+ 'APPLICABILITY · when does a field exist?': '適用性 · 欄位何時才存在？',
+ 'A field is only in play if its parent choice is on. Turn the session window off and both clock fields leave all three artefacts — they do not linger as ignored inputs.':
+   '欄位只有在它的上位選擇開啟時才生效。把時段視窗關掉，兩個時間欄位就會從三份產物中一併消失——不會留下被忽略的輸入。',
+ 'GATE 02': '關卡 02',
+ 'AVAILABILITY · which options can be picked?': '可用性 · 哪些選項可以被選？',
+ 'Options outside the current chain stay visible but blocked, with the reason attached. You cannot select a mechanic that belongs to another family.':
+   '不在當前鏈上的選項仍然看得見，但被鎖住並附上原因。你無法選到屬於其他家族的機制。',
+ 'GATE 03': '關卡 03',
+ 'CONTRADICTION · what changes when you change course?': '矛盾 · 改變方向時會連帶改變什麼？',
+ 'Moving the lens re-seats the family and the mechanic. Both adjustments are reported, so nothing silently disagrees with what you asked for.':
+   '換了視角，家族與機制都會重新就位。兩項調整都會被回報，不會有任何東西默默與你的選擇不一致。',
+ 'Result: a short, lawful decision path from idea to running code.':
+   '結果：從想法到可執行程式，一條簡短而有規則可循的決策路徑。',
+
+ 'B   ·   WHAT IT IS WORTH': 'B   ·   它的價值',
+ 'A consistency engine, a risk gate, a teaching tool': '一部一致性引擎、一道風險關卡、一個教學工具',
+ 'Three engines, one answer': '三部引擎，一個答案',
+ 'Spec, MT5 expert advisor and TradingView strategy are built from one set of decisions, so they cannot describe different systems.':
+   '規格書、MT5 專家顧問與 TradingView 策略都由同一組決定產生，因此不可能描述成兩套不同的系統。',
+ 'No setting that does nothing': '沒有不起作用的設定',
+ 'Every control either changes the generated code or is greyed out with its reason. Dead inputs are the commonest way a backtest lies.':
+   '每個控制項不是改變產生的程式碼，就是連同原因一起變灰。無效輸入正是回測最常見的說謊方式。',
+ 'An audit trail you can hand over': '可交付的稽核軌跡',
+ 'The spec reads as a document — reviewable by a partner, a prop firm or a risk committee without opening a chart.':
+   '規格書讀起來像一份文件——合作夥伴、自營交易公司或風控委員會不用打開圖表就能審閱。',
+ 'Risk rules compiled, not promised': '風險規則寫進程式，不是口頭承諾',
+ 'Daily loss cap, peak-to-trough halt, exposure ceiling and one-position-per-direction ship inside both engines.':
+   '單日虧損上限、由高點回撤即停、持倉曝險上限與每方向僅持一倉，全部內建於兩部引擎。',
+ 'A checklist for judging any strategy': '用來評判任何策略的清單',
+ 'The ten aspects double as an interrogation order for someone else’s system — or a vendor’s black box.':
+   '這十個面向同時也是一套盤問順序，可以用來檢視別人的系統——或供應商的封閉黑箱。',
+ 'Variants in minutes, not weekends': '幾分鐘做出變體，而不是整個週末',
+ 'Change the lens or the mechanic and everything downstream re-derives; the report names what that invalidated.':
+   '換掉視角或機制，下游全部重新推導；報告會指出哪些東西因此失效。',
+ 'What it does not do: choose the edge for you. It makes the arithmetic behind your choice explicit and repeatable.':
+   '它不做的事：替你決定優勢在哪。它只把你選擇背後的計算方式攤開，讓它明確、可重複。',
+
+ 'C   ·   HOW IT WORKS': 'C   ·   如何使用',
+ 'Ten questions, answered in order': '十個問題，依次回答',
+ 'Scope it': '界定範圍',
+ 'Instrument, timeframe and the trading session you actually trade.':
+   '交易標的、時間週期，以及你真正會交易的時段。',
+ 'Name the regime': '說出市場狀態',
+ 'Pick the lens. It sets the regime gate and limits the families below it.':
+   '選定視角。它決定狀態關卡，並限制其下的策略家族。',
+ 'Choose the edge': '選擇優勢',
+ 'Family first, then the exact mechanic that will be coded.':
+   '先選家族，再選要寫成程式的那個機制。',
+ 'Set entry, exit, size': '設定進出場與部位',
+ 'Trigger, confirmation, stop, target, trailing, exposure.':
+   '觸發、確認、停損、目標、移動停損、曝險。',
+ 'Generate and read the report': '產生並閱讀報告',
+ 'All three artefacts at once, with warnings and what changed.':
+   '三份產物一次產出，附上警示與變動說明。',
+ '10 ASPECTS': '10 個面向',
+ 'Target Market': '目標市場',
+ 'Market Lens': '市場視角',
+ 'Strategy / Edge': '策略／優勢',
+ 'Entry Logic': '進場邏輯',
+ 'Trend': '趨勢',
+ 'Range': '區間',
+ 'Volatility': '波動',
+ 'Session bias': '時段偏向',
+ 'USER MANUAL': '使用手冊',
+ '2  ·  MARKET LENS': '2  ·  市場視角',
+ 'Auto-adjusted: family Breakout → Mean Reversion': '自動調整：家族 Breakout → Mean Reversion',
+ 'Donchian lookback (bars)': 'Donchian 回看根數（K 棒）',
+ 'not applicable — only used by Breakout': '不適用——僅 Breakout 使用',
+ '✓   No conflicting selections': '✓   沒有互相衝突的選擇',
+ '2 auto-adjustments made · 3 options currently ruled out, each with its reason.':
+   '已自動調整 2 項 · 目前有 3 個選項被排除，並附上原因。',
+ 'Coverage:  spec 41/41   ·   MQL5 41/41   ·   Pine 41/41':
+   '覆蓋率　規格 / MQL5 / Pine 各 41/41',
+ 'Each active field carries a SPEC · MQL5 · PINE badge, so you can see where it lands.':
+   '每個啟用中的欄位都掛有 SPEC · MQL5 · PINE 標記，可看出它落在哪裡。',
+ 'Nothing is hidden: blocked options stay on screen with their reason.':
+   '不做隱藏：被封鎖的選項仍留在畫面上，並附上原因。',
+
+ 'D   ·   EXAMPLE OUTPUT': 'D   ·   輸出範例',
+ 'The same trade, described three ways': '同一筆交易，三種描述',
+ 'Trend lens  ·  Breakout family  ·  Donchian channel  ·  EURUSD H1  ·  41 of 60 settings active — all 41 present in all three files':
+   'Trend 視角  ·  Breakout 家族  ·  Donchian 通道  ·  EURUSD H1  ·  60 個設定中啟用 41 個，三份產物全部具備',
+ 'TECHNICAL SPEC': '技術規格書',
+ 'the document': '文件',
+ 'MQL5 EXPERT ADVISOR': 'MQL5 專家顧問',
+ 'the executable': '執行檔',
+ 'the backtest': '回測',
+ '§5  Filters': '§5  過濾',
+ '§6  Exit logic': '§6  出場邏輯',
+ '§7  Risk & position size': '§7  風險與部位大小',
+ 'Trend filter': '趨勢過濾',
+ 'only with trend': '僅順勢',
+ 'Trend reference': '趨勢參考',
+ 'Session filter': '時段過濾',
+ 'Stop distance': '停損距離',
+ 'Target method': '目標方式',
+ 'Risk multiple (R)': '風險倍數（R）',
+ 'Reward : risk': '盈虧比',
+ 'Trailing': '移動停損',
+ 'ATR trail, 1.5 × ATR': 'ATR 追蹤，1.5 × ATR',
+ 'Sizing': '部位計算',
+ 'Risk-based %': '依風險百分比',
+ 'Risk per trade': '每筆風險',
+ '1% of equity': '淨值的 1%',
+ 'One pass, no manual translation.  The stop, the target, the trailing distance and the risk figure are the same numbers in all three artefacts — so the backtest and the live EA cannot drift apart.':
+   '一次完成，無需人手轉譯。停損、目標、移動停損距離與風險金額，在三份產物中是同一組數字——回測與實盤 EA 無法背離。',
+ 'Strategy → EA v2  ·  framework overview': 'Strategy → EA v2  ·  框架總覽',
+}
+
+def tr(s):
+    return TR.get(s, s) if ZH else s
+
 W, H = 13.333, 7.5
 ML, CW = 0.75, 11.83
 
@@ -23,7 +179,8 @@ BLUE, AMBER, GREEN, VIOLET, TEAL, RED = (RGBColor(0x2F,0x6F,0xE4), RGBColor(0xC9
 BF, AF, GF, VF, TF, RF = (RGBColor(0xEC,0xF2,0xFE), RGBColor(0xFD,0xF5,0xE4), RGBColor(0xE9,0xF8,0xEF),
     RGBColor(0xF3,0xEE,0xFD), RGBColor(0xE7,0xF5,0xF6), RGBColor(0xFD,0xED,0xEF))
 
-SERIF, SANS, MONO = 'Cambria', 'Calibri', 'Consolas'
+SERIF, SANS, MONO = (('Microsoft JhengHei','Microsoft JhengHei','Consolas') if ZH
+                     else ('Cambria','Calibri','Consolas'))
 
 # minimum type size used anywhere in this deck
 MIN = 10
@@ -62,6 +219,7 @@ def shape(s, kind, x, y, w, h, fill=BLUE, line=None, lw=1.0):
 
 
 def run(p, txt, size=11, color=BODY, bold=False, italic=False, font=SANS):
+    txt = tr(txt)
     assert size >= MIN, f'{size}pt below the {MIN}pt floor: {txt[:40]!r}'
     r = p.add_run(); r.text = txt
     f = r.font
@@ -406,5 +564,6 @@ text(s, ML + 0.30, 6.06, CW - 0.6, 0.50,
      'numbers in all three artefacts — so the backtest and the live EA cannot drift apart.',
      size=10.5, color=RGBColor(0x1B,0x3B,0x7A), line=1.24)
 
-prs.save('/home/workspace/slide-decks/strategy-to-ea-v2/Strategy-to-EA-v2-Framework.pptx')
+OUT = '/home/workspace/slide-decks/strategy-to-ea-v2/Strategy-to-EA-v2-Framework' + ('-CN' if ZH else '') + '.pptx'
+prs.save(OUT)
 print('saved', len(prs.slides._sldIdLst))

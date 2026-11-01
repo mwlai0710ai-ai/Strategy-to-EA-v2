@@ -9,7 +9,16 @@ wording, colours and numbers are all editable.
 | `Strategy-to-EA-v2-Framework.pptx` | The deck. Opens in PowerPoint, Keynote, Google Slides, WPS. |
 | `Strategy-to-EA-v2-Framework.pdf` | Same deck, flattened, for sending to people who will not open a .pptx. |
 | `slide-01.png` … `slide-05.png` | Per-slide renders at 150 dpi, for slideshows, web or chat. |
-| `build-deck.py` | Generator (python-pptx). Re-run to rebuild the whole deck. |
+| `Strategy-to-EA-v2-Framework-CN.pptx` | Traditional Chinese (繁體) variant of the same deck. |
+| `Strategy-to-EA-v2-Framework-CN.pdf` | Same, flattened. |
+| `cn-slide-01.png` … `cn-slide-05.png` | Per-slide renders of the Chinese deck. |
+| `build-deck.py` | Generator (python-pptx). `python3 build-deck.py` builds English, `python3 build-deck.py zh` builds the Chinese variant from the same source and the same type scale. |
+
+The Chinese deck keeps English for product and parameter names (`Breakout`, `Donchian`,
+`MQL5`, `ATR`, the spec fields) because those are what the tool and the generated code actually
+say; only the explanatory prose, headings and section labels are translated.Traditional Chinese
+is wider than Latin text at the same point size, so a few strings were shortened rather than
+shrunk — no run in either deck is below 10 pt.
 
 ## Slide map
 
