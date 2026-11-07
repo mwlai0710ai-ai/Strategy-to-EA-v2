@@ -1,5 +1,5 @@
 /* ============================================================================
-   Strategy → EA v2 · engine.js
+   Strategy → EA v2.1 · engine.js
    The constraint engine. Three jobs:
 
    1 · applicability  — a field is IN or OUT of play (state.__active[key]).

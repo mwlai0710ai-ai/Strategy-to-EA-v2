@@ -3,6 +3,7 @@ This file provides guidance when working with code in this repository. The READM
 # Project Notes
 
 > **Published site:** https://strategy-to-ea-v2-mwlai.zocomputer.io (public)
+> **Current revision: v2.1** (light theme + enlarged type; see “What v2.1 changed”).
 > **This folder is the canonical v2 source.** It is a Zo Site: `index.html` + `public/app/*.js`.
 > The v1 site is a separate deployment from `../strategy-to-ea-v1` and stays untouched.
 >
@@ -10,9 +11,37 @@ This file provides guidance when working with code in this repository. The READM
 > back into `../strategy-to-ea-v1` is not needed and republishing *that* folder would replace the
 > live v1 URL with v2.
 
-**Strategy → EA v2** — an interactive, single-page framework that turns a trading idea into three
+**Strategy → EA v2.1** — an interactive, single-page framework that turns a trading idea into three
 consistent artifacts: a Technical Spec, a compilable **MQL5 Expert Advisor**, and a **Pine Script v6
 `strategy()`**. The tool lives at the site root (`/`).
+
+## What v2.1 changed
+
+v2.1 is a presentation pass over the v2 framework — the field model and the three generators are
+unchanged, and **both audit harnesses still print `NONE`** (`audit-coverage`, `audit-structure`). What moved:
+
+1. **Light theme.** The page swapped its dark navy palette for a light beige one. Page background
+   `#f5efe2`, panels `#fffdf8`, secondary surfaces `#f8f2e6`; body text `#17181c`, muted `#454b57`,
+   dim `#5f6673`; accent hues darkened so every accent also reads as text on beige (primary
+   `#1c5fce`, gold `#97650e`, ok `#12813c`, warn `#a86a00`, bad `#c22a33`). The palette lives in the
+   `:root` block at the top of `index.html`.
+2. **Aspect accent colours darkened** in `public/app/model.js` (`ASPECTS[].color`) so the mode
+   chips, aspect numbers and active-rail bar stay legible on light. These colours are UI-only —
+   no generator reads them, so output is byte-identical.
+3. **Every font size scaled up ~1.3×** for presentation legibility: base `14px → 18px`, smallest
+   chips `9px → 12px`, `19px → 25px`, and so on. Sizes are literal px in the `index.html` `<style>`
+   block (plus two inline `style="font-size:…"` on the output header and verify line), so a
+   find-and-replace over `font-size:Npx` is the whole change — there is no CSS variable to flip.
+   Layout widths were widened to match: `.wrap` 1400→1500, rail 288→314, field/settings grid
+   minimums 280/268→320/300.
+4. **Version surfaced as v2.1** — page `<title>`, the header badge, and every generated artifact:
+   the MQL5 header comment + `#property version "2.10"` + `Print`/`Comment`, the Pine header +
+   dashboard title cell, and the spec title + §16 change-log line. The **URL is unchanged** and the
+   localStorage state key is still `s2ea-v2-state`, so an existing visitor keeps their selections.
+5. **Version strings follow into the docs and headers** — `tools/gen-manual.mjs` now titles the
+   manual v2.1 (regenerated `.md`, `.pdf` and the `public/manual/` build copy; the PDF **filename**
+   stays `Strategy-to-EA-V2-User-Manual.pdf` so the left-rail link does not break), and the banner
+   comments atop `engine.js` and `model.js` were bumped to match.
 
 ## What v2 changed
 

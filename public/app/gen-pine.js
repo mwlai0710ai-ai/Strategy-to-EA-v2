@@ -29,7 +29,7 @@
 
     L.push('//@version=6');
     L.push('// ══════════════════════════════════════════════════════════════════');
-    L.push('//  Strategy → EA v2  ·  TradingView strategy');
+    L.push('//  Strategy → EA v2.1  ·  TradingView strategy');
     L.push('//  ' + get('symbol') + ' ' + get('timeframe') + '  ·  ' + get('sub') + '  ·  ' + get('lens') + ' lens');
     L.push('//  Generated for the configuration below. Settings marked "not');
     L.push('//  applicable" in the builder are absent by design.');
@@ -199,7 +199,7 @@
       L.push('// ── Dashboard ─────────────────────────────────────────────────────');
       L.push('if barstate.islast');
       L.push('    var table db = table.new(position.top_right, 2, 6, border_width=1)');
-      L.push('    table.cell(db, 0, 0, "Strategy → EA v2", text_color=color.white, text_size=size.small)');
+      L.push('    table.cell(db, 0, 0, "Strategy → EA v2.1", text_color=color.white, text_size=size.small)');
       L.push('    table.cell(db, 1, 0, ' + s(get('sub')) + ', text_color=color.gray, text_size=size.small)');
       L.push('    table.cell(db, 0, 1, "Lens", text_color=color.gray, text_size=size.small)');
       L.push('    table.cell(db, 1, 1, ' + s(get('lens')) + ', text_color=color.white, text_size=size.small)');

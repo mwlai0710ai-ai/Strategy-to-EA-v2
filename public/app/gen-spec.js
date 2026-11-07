@@ -24,7 +24,7 @@
     }
 
     line('===================================');
-    line('  TECHNICAL SPEC  ·  Strategy → EA v2');
+    line('  TECHNICAL SPEC  ·  Strategy → EA v2.1');
     line('===================================');
     line('Generated ' + new Date().toISOString().slice(0, 10) + '  ·  ' + get('timeframe') + '  ·  ' + get('symbol'));
     line('');
@@ -195,7 +195,7 @@
     /* §16 Change log */
     block('§16 · Change log', [
       'v1 · initial spec',
-      'v2 · dependency engine (in-aspect and cross-aspect conflicts), every option wired into all three outputs, validation plan added'
+      'v2.1 · dependency engine (in-aspect and cross-aspect conflicts), every option wired into all three outputs, validation plan added'
     ]);
 
     return { text: L.join('\n'), consumed: consumed };
